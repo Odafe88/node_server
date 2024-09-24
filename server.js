@@ -1,101 +1,98 @@
-const http = require("http");
-const path = require("path");
-const fs = require("fs");
-const fsPromises = require("fs").promises;
+const express = require("express");
 
-const logEvents = require("./logEvents");
-const EventEmitter = require("events");
-const { error } = require("console");
-const { response } = require("express");
-class Emitter extends EventEmitter { };
-//Initialize object
-const myEmitter = new Emitter();
+const app = express();
+const path = require("path");
+const cors = require("cors");
+const { logger } = require("./middleware/logEvents");
+const errorHandler = require("./middleware/errorHandler");
 
 const PORT = process.env.PORT || 3500;
 
-const serveFile = async (filePath, contentType, response) => {
-    try {
-        const data = await fsPromises.readFile(filePath, "utf8");
-        response.writeHead(200, { "Content-Type": contentType });
-        response.end(data);
-    } catch (error) {
-        console.log(error);
-        response.statusCode = 500;
-        response.end;
-    }
+
+app.use(logger);
+// custom middleware logger
+const whiteList = ["https://www.odafe.com", "http://127://.0.0.1:5500", "https://localhost:3500"];
+const corsOption = {
+    origin: (origin, callback) => {
+        if (whiteList.indexOf(origin) !== -1 || !origin) {
+            callback(null, true)
+        } else {
+            callback(new Error("Not allowed by CORS"))
+        }
+    },
 }
 
-const server = http.createServer((req, res) => {
-    console.log(req.url, req.method)
+// Cross Origin Resource Sharing
+app.use(cors(corsOption));
 
-    const extension = path.extname(req.url)
-    let contentType;
+// Middleware
+// Three types : built-in, custom and third-party(ies)
 
-    switch (extension) { 
-        case ".css":
-            contentType = "text/css";
-            break;
-        case ".js":
-            contentType = "text/javascript";
-            break;
-        case ".json":
-            contentType = "application/json";
-            break;
-        case ".jpeg":
-            contentType = "image/jpeg";
-            break;
-        case ".png":
-            contentType = "image/png";
-            break;
-        case ".txt":
-            contentType = "text/plain";
-            break;
-        default:
-            contentType = "text/html";
-    }
+// builtin used to hanle urlencoded data
+// In other words, form data:
+// "content-type: application/x-www-form-urlencoded"
+app.use(express.urlencoded({ extended: false }));
 
-    let filePath = contentType === "text/html" && req.url === "/"
-        ? path.join(__dirname, "views", "index.html")
-        : contentType === "text/html" && req.url.slice(-1) === "/"
-            ? path.join(__dirname, "views", req.url, "index.html")
-            : contentType === "text/html"
-                ? path.join(__dirname, "views", req.url)
-                : path.join(__dirname, req.url)
-    
-    //makes the .html extension not required in the browser
-    if (!extension && req.url.slice(-1) !== "/") filePath += ".html";
 
-    const fileExists = fs.existsSync(filePath);
+// built-in middleware for json
+app.use(express.json());
 
-    if (fileExists) {
-        //serve the file
-        serveFile(filePath, contentType, res);
+// Serve static files
+app.use(express.static(path.join(__dirname, "/public")));
+
+
+
+app.get("^/$|index(.html)?", (req, res) => {
+    // res.sendFile("./views/index.html", { root: __dirname });
+    res.sendFile(path.join(__dirname, "views", "index.html"));
+});
+
+app.get("/new-page(.html)?", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "new-page.html"));
+});
+app.get("/old-page(.html)?", (req, res) => {
+    res.redirect(301, "/new-page.html");
+});
+
+// Route Handlers
+app.get("./hello(.html)?", (req, res, next) => {
+    console.log("Attempted to load hello.html");
+    next();
+}, (req, res) => {
+    res.send("Finished!")
+})
+
+const one = (req, res, next) => {
+    console.log("one")
+    next();
+}
+const two = (req, res, next) => {
+    console.log("two")
+    next();
+}
+const three = (req, res, next) => {
+    console.log("three")
+    res.send("Dinished!");
+}
+
+app.get("./chain(.html)?", [one, two, three])
+
+app.all("*", (req, res) => {
+    res.status(404)
+    if (req.accepts("html")) {
+        res.sendFile(path.join(__dirname, "views", "404.html"))
+    } else if (req.accepts("json")) {
+        res.json({error: "404 Not Found"})
     } else {
-        switch (path.parse(filePath).base) {
-            case "old-page.html":
-                res.writeHead(301, { "Location": "/new-page.html" });
-                res.end();
-                break;
-            case "www-page.html":
-                res.writeHead(301, {
-                    "Location": "/"
-                });
-                res.end();
-                break;
-            default:
-                serveFile(path.join(__dirname, "views", "404.html"), "text/html", res);
-                //serve a 404 Response
-                
-                
-        }
+        res.type('txt').send("404 Not Found")
     }
 })
 
-server.listen(PORT, () => {
+
+app.use(errorHandler);
+
+app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
 });
 
-//add listener for log events
-// myEmitter.on("log", (msg) => logEvents(msg));
 
-// myEmitter.emit("log", "Log event emitted");

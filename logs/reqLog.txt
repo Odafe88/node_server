@@ -1,0 +1,15 @@
+20240924	14:07:05	87dbbe9e-558a-47ab-bbc0-437b7bc94f0a	OPTIONS	https://www.google.com	/
+20240924	14:07:05	e3901c9b-6ae5-40c5-b2d6-ac08803dfb28	GET	https://www.google.com	/
+20240924	14:22:50	6bd8baa9-6f4b-462f-a248-de2218cde641	OPTIONS	https://www.google.com	/
+20240924	14:22:51	2d4035ab-a88c-4b01-9ed4-2e5c4a1cf688	GET	https://www.google.com	/
+20240924	14:23:50	83cf3cde-cebb-40f0-8c81-7b1dfa3d9379	GET	undefined	/css/style.css
+20240924	14:23:50	0c10f0bf-337e-42bc-b58f-e9933d5bcc3c	GET	undefined	/img/img1.jpg
+20240924	14:24:12	9d4f9617-3465-4003-ba0e-ec100751aa65	GET	undefined	/
+20240924	14:25:38	a65af813-2198-466e-b1f0-ea059413f665	GET	undefined	/
+20240924	14:25:39	232c9a43-14de-4c02-a588-593d35dfaf03	GET	undefined	/css/style.css
+20240924	14:25:39	b4140504-4744-4a48-bdfd-a36d76abc7f3	GET	undefined	/img/img1.jpg
+20240924	14:35:14	955bd930-bbfd-4980-bf9e-1d003b65ce99	GET	undefined	/
+20240924	14:36:16	3add4d37-76c7-4310-bd9c-530827b2ffb0	GET	undefined	/
+20240924	14:37:21	1633c180-5e1e-437e-8754-f09c80244812	GET	undefined	/
+20240924	14:37:21	7d201957-7e91-4abe-a45b-bce34cb09948	GET	undefined	/css/style.css
+20240924	14:37:21	5d610bfb-33d4-4a76-bae2-75d4d48cfab4	GET	undefined	/img/img1.jpg
